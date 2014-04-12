@@ -25,7 +25,8 @@ if test $# -eq 0; then
     exit 1
 fi
 
-source ./notes.sh
+source $(dirname "$0")/notes.sh
+
 
 case $1 in
     a) addnote;;

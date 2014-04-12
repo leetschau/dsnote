@@ -8,17 +8,17 @@ This is a note-taking utility inspired by Evernote. It's written in bash. So, of
 
 Then open your ~/.bashrc or ~/.zshrc, add this line:
 
-    alias dn='/path/to/dsnote/donshell.sh'
+    alias dn='/path/to/your/dsnote/donshell.sh'
 
 # Usage
 
 * Show help:
 
-    dn
+    `dn`
 
 * Create note:
 
-    dn a
+    ```dn a```
 
 * List note:
 
