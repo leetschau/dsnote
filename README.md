@@ -12,45 +12,25 @@ Then open your ~/.bashrc or ~/.zshrc, add this line:
 
 # Usage
 
-* Show help:
+* Show help: `dn`
 
-    `dn`
+* Create note: `dn a`
 
-* Create note:
+* List note: `dn l [n]`
 
-    ```dn a```
+* Edit note: `dn e [n]`
 
-* List note:
+* View note: `dn v [n]`
 
-    dn l
+* Search note: `dn s key1 key2 ...`
 
-* Edit note:
+* Complex Search: `dn sc -t key1 key2 ... -g key1 key2... `
 
-    dn e [n]
+* Delete note: `dn del [n]`
 
-* View note:
+* Backup notes: `dn b`
 
-    dn v [n]
-
-* Search note:
-
-    dn s key1 key2
-
-* Complex Search:
-
-    dn sc -t key1 key2 ... -g key1 key2
-
-* Delete note:
-
-    dn del [n]
-
-* Backup notes:
-
-    dn b
-
-* Restore notes:
-
-    dn r
+* Restore notes: `dn r`
 
 # Some notes
 
