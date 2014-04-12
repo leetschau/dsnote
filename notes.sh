@@ -1,0 +1,167 @@
+DonnoHome=".donno"
+BaseDir="${HOME}/$DonnoHome"
+Repo="${BaseDir}/repo"
+LastResult="${BaseDir}/.last-result"
+LastSync="${BaseDir}/.last-sync"
+Trash="${BaseDir}/trash/"
+
+function printnotes() {
+    note_no=1
+    for fullname in $(cat ${LastResult}); do
+        updated=$(date -r ${fullname} +"%y-%m-%d %H:%M:%S")
+        title=$(awk -F ': ' 'FNR==1 {print $2}' ${fullname})
+        tags=$(awk -F ': ' 'FNR==2 {print $2}' ${fullname})
+        filename=$(basename $fullname)
+        note_type=$(echo ${filename:0:1} | tr '[:lower:]' '[:upper:]')
+        created=$(awk -F ': ' 'FNR==4 {print $2}' ${fullname})
+        backuped=""
+        test $fullname -nt $LastSync && backuped="+"
+        echo ${note_no}. [${updated}] ${title} [${tags}] [Type:${note_type}] ${created} $backuped
+        note_no=$((${note_no} + 1))
+    done
+}
+
+function listnotes() {
+    echo No. Updated, Title, Tags, Notebook, Created, Sync?
+    if test $# -eq 1; then
+        listno=$1
+    elif test $# -eq 0; then
+        listno=5
+    else
+        echo Bad command format. dn l [N].
+        exit 1
+    fi
+    ls -t ${Repo}/*.mkd|head -${listno} > ${LastResult}
+    printnotes
+}
+
+function simplesearch() {
+    if test $# -eq 0; then
+        echo Bad command format: no search keywords found.
+        exit 1
+    fi
+    # grep -i: ignore case; -l: only print file name
+    res=$(grep -i -l $1 $Repo/*.mkd)
+    shift
+    for word in $@; do
+        res=$(grep -i -l $word $res)
+    done
+    ls -t ${res} > ${LastResult}
+    printnotes
+}
+
+function complexsearch() {
+    if test $# -eq 0; then
+        echo Bad command format: no search keywords found.
+        exit 1
+    fi
+    res=$(ls -t $Repo/*.mkd)
+    for key in $@; do
+        if [ $key = "-t" ]; then
+            status="Title:"
+        elif [ $key = "-g" ]; then
+            status="Tags:"
+        else
+            if [ -z $status ]; then
+                echo Bad format: there is no -t/g before keys
+                exit 1
+            fi
+            res=$(grep -i -l "$status\s.*$key" $res)
+        fi
+    done 
+    ls -t ${res} > ${LastResult}
+    printnotes
+}
+
+function backupnotes() {
+    cd ~
+    fn=notes$(date +"%y-%m-%d-%H.%M.%S").bz2
+    touch $LastSync
+    tar jcf $fn $DonnoHome/
+    cd -
+    mv ~/$fn .
+    if [ $# -eq 1 ] && [ $1 = 'c' ] ; then
+        echo upload $fn to dropbox...
+    fi
+}
+
+function restorenotes() {
+    if [ $# -eq 1 ] && [ $1 = 'c' ]; then
+        echo download most recent archive from dropbox to CWD...
+    fi
+    src=$(ls -t *.bz2|head -1)
+    if [ -z $src ]; then
+        echo There is no bz2 file under current folder.
+        exit 1
+    fi
+    read -p "Restore from $src? All local notes lost. (y/n) " -n 1
+    echo
+    if [[ $REPLY =~ ^y$ ]]; then
+        rm -rf ~/.donno
+        tar jxf $src -C ~/
+    else
+        echo User cancelled.
+    fi
+    listnotes
+}
+
+function editnote() {
+    if test $# -eq 1; then
+        vim $(sed -n $1p ${LastResult})
+    elif test $# -eq 0; then
+        vim $(sed -n 1p ${LastResult})
+    else
+        echo Bad command format. dn e [N].
+        exit 1
+    fi
+    listnotes
+}
+
+function viewnote() {
+    if test $# -eq 1; then
+        vim -R $(sed -n $1p ${LastResult})
+    elif test $# -eq 0; then
+        vim -R $(sed -n 1p ${LastResult})
+    else
+        echo Bad command format. dn v [N].
+        exit 1
+    fi
+}
+
+function addnote() {
+    TempNote="newnote.tmp"
+    created=$(date +"%Y-%m-%d %H:%M:%S")
+    cat <<EOF > $TempNote
+Title: 
+Tags: 
+Note Type [t/j/o/y/c]: 
+Created: $created
+
+------
+
+EOF
+    vim $TempNote
+    wc=$(awk FNR==1 $TempNote | wc -w)
+    nt=$(awk -F ': ' 'FNR==3 {print $2}' $TempNote)
+    fn=${nt}$(date +"%y%m%d%H%M%S").mkd
+    if [ $wc -gt 1 ] && [ -n $nt ]; then
+        mv $TempNote $Repo/$fn
+    else
+        rm $TmpNote
+        echo Adding note cancelled: blank title or type.
+    fi
+    listnotes
+}
+
+function delnote() {
+    mkdir -p $Trash
+    if test $# -eq 1; then
+        mv $(sed -n $1p ${LastResult}) $Trash
+    elif test $# -eq 0; then
+        mv $(sed -n 1p ${LastResult}) $Trash
+    else
+        echo Bad command format. dn del [N].
+        exit 1
+    fi
+    listnotes
+}
