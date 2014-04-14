@@ -8,7 +8,7 @@ Available command:
 a           Add note
 b [c]       Backup notes (to Cloud)
 l [N]       List recent [N] modified notes, 5 by default
-r [c]       Restore notes (from Cloud)
+r [c]       Restore most recent notes (from Cloud)
 s [key1 key2 ...]
             Simple search
 sc [-t titile1 title2 ...] [-g tag1 tag2 ...]

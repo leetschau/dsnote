@@ -79,15 +79,30 @@ function backupnotes() {
     touch $LastSync
     tar jcf $fn $DonnoHome/
     cd -
-    mv ~/$fn .
-    if [ $# -eq 1 ] && [ $1 = 'c' ] ; then
-        echo upload $fn to dropbox...
+    if [[ ! -f ./$fn ]]; then
+        mv ~/$fn .
+    fi
+    if [[ $# == 1 && $1 == 'c' ]]; then
+        script_dir=$(dirname $0)
+        if [[ -x $script_dir/../Dropbox-Uploader/dropbox_uploader.sh ]]; then
+            $script_dir/../Dropbox-Uploader/dropbox_uploader.sh upload $fn backup/
+        else
+            echo "Please install Dropbox-Uploader for this function."
+            exit 1
+        fi
     fi
 }
 
 function restorenotes() {
-    if [ $# -eq 1 ] && [ $1 = 'c' ]; then
-        echo download most recent archive from dropbox to CWD...
+    if [[ $# == 1 && $1 == 'c' ]]; then
+        script_dir=$(dirname $0)
+        if [[ -x $script_dir/../Dropbox-Uploader/dropbox_uploader.sh ]]; then
+            newest=$($script_dir/../Dropbox-Uploader/dropbox_uploader.sh list backup | awk 'END{print $3}')
+            $script_dir/../Dropbox-Uploader/dropbox_uploader.sh download backup/$newest
+        else
+            echo "Please install Dropbox-Uploader for this function."
+            exit 1
+        fi
     fi
     src=$(ls -t *.bz2|head -1)
     if [ -z $src ]; then
