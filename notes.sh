@@ -82,6 +82,11 @@ function complexsearch() {
 }
 
 function backupnotes() {
+    if [[ $# = 1 && $1 != 'c' ]]; then
+        echo "Unkown parameters. Synopsis: dn b [c]"
+        exit 1
+    fi
+
     cd ~
     fn=notes$(date +"%y-%m-%d-%H.%M.%S").bz2
     touch $LastSync
