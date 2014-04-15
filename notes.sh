@@ -36,7 +36,7 @@ function listnotes() {
 }
 
 function simplesearch() {
-    if test $# -eq 0; then
+    if [[ $# = 0 ]]; then
         echo Bad command format: no search keywords found.
         exit 1
     fi
@@ -46,12 +46,16 @@ function simplesearch() {
     for word in $@; do
         res=$(grep -i -l $word $res)
     done
-    ls -t ${res} > ${LastResult}
-    printnotes
+    if [[ -z $res ]]; then
+        echo Nothing match.
+    else
+        ls -t $res > $LastResult
+        printnotes
+    fi
 }
 
 function complexsearch() {
-    if test $# -eq 0; then
+    if [[ $# = 0 ]]; then
         echo Bad command format: no search keywords found.
         exit 1
     fi
@@ -62,15 +66,19 @@ function complexsearch() {
         elif [ $key = "-g" ]; then
             status="Tags:"
         else
-            if [ -z $status ]; then
-                echo Bad format: there is no -t/g before keys
+            if [[ -z $status ]]; then
+                echo Bad format: there is no -t\|g before keys
                 exit 1
             fi
             res=$(grep -i -l "$status\s.*$key" $res)
         fi
     done 
-    ls -t ${res} > ${LastResult}
-    printnotes
+    if [[ -z $res ]]; then
+        echo Nothing match.
+    else
+        ls -t $res > $LastResult
+        printnotes
+    fi
 }
 
 function backupnotes() {
