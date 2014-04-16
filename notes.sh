@@ -61,10 +61,12 @@ function complexsearch() {
     fi
     res=$(ls -t $Repo/*.mkd)
     for key in $@; do
-        if [ $key = "-t" ]; then
+        if [[ $key = "-t" ]]; then
             status="Title:"
-        elif [ $key = "-g" ]; then
+        elif [[ $key = "-g" ]]; then
             status="Tags:"
+        elif [[ $key = "-b" ]]; then
+            status="Notebook"
         else
             if [[ -z $status ]]; then
                 echo Bad format: there is no -t\|g before keys
@@ -162,7 +164,7 @@ function addnote() {
     cat <<EOF > $TempNote
 Title: 
 Tags: 
-Note Type [t/j/o/y/c]: 
+Notebook [t/j/o/y/c]: 
 Created: $created
 
 ------
@@ -170,13 +172,13 @@ Created: $created
 EOF
     vim $TempNote
     wc=$(awk FNR==1 $TempNote | wc -w)
-    nt=$(awk -F ': ' 'FNR==3 {print $2}' $TempNote)
-    fn=${nt}$(date +"%y%m%d%H%M%S").mkd
-    if [ $wc -gt 1 ] && [ -n $nt ]; then
+    notebook=$(awk -F ': ' 'FNR==3 {print $2}' $TempNote)
+    fn=$notebook$(date +"%y%m%d%H%M%S").mkd
+    if [[ $wc -gt 1 && -n $notebook ]]; then
         mv $TempNote $Repo/$fn
     else
         rm $TmpNote
-        echo Adding note cancelled: blank title or type.
+        echo Adding note cancelled: blank title or notebook.
     fi
     listnotes
 }
