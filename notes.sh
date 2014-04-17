@@ -61,18 +61,26 @@ function complexsearch() {
     fi
     res=$(ls -t $Repo/*.mkd)
     for key in $@; do
-        if [[ $key = "-t" ]]; then
-            status="Title:"
+        if [[ $key = "-c" ]]; then
+            line=0
+        elif [[ $key = "-t" ]]; then
+            line=1
         elif [[ $key = "-g" ]]; then
-            status="Tags:"
+            line=2
         elif [[ $key = "-b" ]]; then
-            status="Notebook"
+            line=3
         else
-            if [[ -z $status ]]; then
+            if [[ -z $line ]]; then
                 echo Bad format: there is no -t\|g before keys
                 exit 1
             fi
-            res=$(grep -i -l "$status\s.*$key" $res)
+            if [[ line -eq 0 ]]; then
+                res=$(grep -i -l $key $res)
+            elif [[ line -eq 3 ]]; then
+                res=$(awk "BEGIN{IGNORECASE=1} FNR==$line && /.*\s${key}.*/ {print FILENAME}" $res)
+            else
+                res=$(awk "BEGIN{IGNORECASE=1} FNR==$line && /.*${key}.*/ {print FILENAME}" $res)
+            fi
         fi
     done 
     if [[ -z $res ]]; then
@@ -82,7 +90,6 @@ function complexsearch() {
         printnotes
     fi
 }
-
 function backupnotes() {
     if [[ $# = 1 && $1 != 'c' ]]; then
         echo "Unkown parameters. Synopsis: dn b [c]"

@@ -11,8 +11,8 @@ l [N]       List recent [N] modified notes, 5 by default
 r [c]       Restore most recent notes (from Cloud)
 s [key1 key2 ...]
             Simple search
-sc [-t titile1 title2 ...] [-g tag1 tag2 ...] [-b bookname]
-            Complex search
+sc [-t titile1 title2 ...] [-g tag1 tag2 ...] [-c key1 key2 ...] [-b bookname]
+            Complex search, -c means serach in all contents of a note
 v [N]       View the note, the most recent modified by default
 e [N]       Edit the note, the most recent modified by default
 del         Delete the note
