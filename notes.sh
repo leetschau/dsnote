@@ -168,7 +168,8 @@ function viewnote() {
 function addnote() {
     TempNote="newnote.tmp"
     created=$(date +"%Y-%m-%d %H:%M:%S")
-    cat <<EOF > $TempNote
+    if [[ ! -f $TempNote ]]; then
+        cat <<EOF > $TempNote
 Title: 
 Tags: 
 Notebook [t/j/o/y/c]: 
@@ -177,6 +178,7 @@ Created: $created
 ------
 
 EOF
+    fi
     vim $TempNote
     wc=$(awk FNR==1 $TempNote | wc -w)
     notebook=$(awk -F ': ' 'FNR==3 {print $2}' $TempNote)
@@ -184,8 +186,12 @@ EOF
     if [[ $wc -gt 1 && -n $notebook ]]; then
         mv $TempNote $Repo/$fn
     else
-        rm $TmpNote
         echo Adding note cancelled: blank title or notebook.
+        read -p "Delete the temp note? (y/n) " -n 1
+        echo
+        if [[ $REPLY =~ ^y$ ]]; then
+            rm $TempNote
+        fi
     fi
     listnotes
 }
