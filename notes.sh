@@ -42,9 +42,16 @@ function simplesearch() {
     fi
     # grep -i: ignore case; -l: only print file name
     res=$(grep -i -l $1 $Repo/*.mkd)
+    if [[ -z $res ]]; then
+        echo Nothing match.
+        exit 0
+    fi
     shift
     for word in $@; do
         res=$(grep -i -l $word $res)
+        if [[ -z $res ]]; then
+            break
+        fi
     done
     if [[ -z $res ]]; then
         echo Nothing match.
