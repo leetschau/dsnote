@@ -189,6 +189,10 @@ EOF
     vim $TempNote
     wc=$(awk FNR==1 $TempNote | wc -w)
     notebook=$(awk -F ': ' 'FNR==3 {print $2}' $TempNote)
+    if [[ ${#notebook} -ne 1 ]]; then
+        echo '"notebook" property must be specified with only ONE character, use "dn a" to edit notebook again'
+        exit 1
+    fi
     fn=$notebook$(date +"%y%m%d%H%M%S").mkd
     if [[ $wc -gt 1 && -n $notebook ]]; then
         mv $TempNote $Repo/$fn
