@@ -151,13 +151,17 @@ function restorenotes() {
 
 function editnote() {
     if test $# -eq 1; then
-        vim $(sed -n $1p ${LastResult})
+        target=$(sed -n $1p ${LastResult})
     elif test $# -eq 0; then
-        vim $(sed -n 1p ${LastResult})
+        target=$(sed -n 1p ${LastResult})
     else
         echo Bad command format. dn e [N].
         exit 1
     fi
+    vim $target
+    notetype=$(awk -F ': ' 'FNR==3 {print $2}' $target)
+    originName=$(basename $target)
+    mv $target $Repo/$notetype${originName:1}
     listnotes
 }
 
@@ -188,16 +192,16 @@ EOF
     fi
     vim $TempNote
     wc=$(awk FNR==1 $TempNote | wc -w)
-    notebook=$(awk -F ': ' 'FNR==3 {print $2}' $TempNote)
-    if [[ ${#notebook} -ne 1 ]]; then
-        echo '"notebook" property must be specified with only ONE character, use "dn a" to edit notebook again'
+    notetype=$(awk -F ': ' 'FNR==3 {print $2}' $TempNote)
+    if [[ ${#notetype} -ne 1 ]]; then
+        echo '"notetype" property must be specified with only ONE character, use "dn a" to edit notetype again'
         exit 1
     fi
-    fn=$notebook$(date +"%y%m%d%H%M%S").mkd
-    if [[ $wc -gt 1 && -n $notebook ]]; then
+    fn=$notetype$(date +"%y%m%d%H%M%S").mkd
+    if [[ $wc -gt 1 && -n $notetype ]]; then
         mv $TempNote $Repo/$fn
     else
-        echo Adding note cancelled: blank title or notebook.
+        echo Adding note cancelled: blank title or notetype.
         read -p "Delete the temp note? (y/n) " -n 1
         echo
         if [[ $REPLY =~ ^y$ ]]; then
