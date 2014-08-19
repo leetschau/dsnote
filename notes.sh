@@ -161,7 +161,10 @@ function editnote() {
     vim $target
     notetype=$(awk -F ': ' 'FNR==3 {print $2}' $target)
     originName=$(basename $target)
-    mv $target $Repo/$notetype${originName:1}
+    newname=$Repo/$notetype${originName:1}
+    if [[ ! -f $newname ]]; then
+        mv $target $newname
+    fi
     listnotes
 }
 
