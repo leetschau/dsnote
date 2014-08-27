@@ -1,10 +1,33 @@
 #!/bin/bash
 
-REPO="/home/chad/.donno/repo"
-OCTO_BLOG_HOME="/home/chad/apps/octopress/source/_posts"
+show_help() {
+    cat <<-EOF
+usage: ./conv-note.sh [all | help]
+Convert dsnote to octopress notes. Then you can use the following commands to publish your notes:
 
-for afile in $(find $REPO -newer $(ls -t $OCTO_BLOG_HOME/*.markdown|head -1) -type f | egrep 't[0-9]+.mkd'); do
-    title=$(sed -n 1p $afile | cut -c8-)
+cd $OCTOPRESS_HOME
+rake generate
+rake preview
+rake deploy
+
+If you add option "all", then all dsnotes will be generated. Without it, only notes newer than newest .markdown file in $OCTO_BLOG_HOME/source/_posts will be generated.
+EOF
+}
+
+REPO="$HOME/.donno/repo"
+OCTO_BLOG_HOME="$HOME/apps/octopress/source/_posts"
+
+if [[ $# -eq 0 ]]; then
+    newnotes=$(find $REPO -newer $(ls -t $OCTO_BLOG_HOME/*.markdown|head -1) -type f | egrep 't[0-9]+.mkd')
+elif [[ $1 == "all" ]]; then
+    newnotes=$(ls $REPO/t*.mkd)
+else
+    show_help
+    exit 1
+fi
+
+for afile in $newnotes; do
+    title=$(sed -n 1p $afile | cut -c8- | sed 's/\"/`/g')
     tags=$(sed -n 2p $afile | cut -c7- | sed 's/;/,/g')
     created=$(sed -n 4p $afile | cut -c10-)
     oldfn=$(basename $afile)
