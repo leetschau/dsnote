@@ -4,6 +4,8 @@ Repo="${BaseDir}/repo"
 LastResult="${BaseDir}/.last-result"
 LastSync="${BaseDir}/.last-sync"
 Trash="${BaseDir}/trash/"
+# EDITOR="vim"
+EDITOR="atom -f"
 
 function printnotes() {
     note_no=1
@@ -158,7 +160,7 @@ function editnote() {
         echo Bad command format. dn e [N].
         exit 1
     fi
-    vim $target
+    $EDITOR $target
     notetype=$(awk -F ': ' 'FNR==3 {print $2}' $target)
     originName=$(basename $target)
     newname=$Repo/$notetype${originName:1}
@@ -170,9 +172,9 @@ function editnote() {
 
 function viewnote() {
     if test $# -eq 1; then
-        vim -R $(sed -n $1p ${LastResult})
+        $EDITOR -R $(sed -n $1p ${LastResult})
     elif test $# -eq 0; then
-        vim -R $(sed -n 1p ${LastResult})
+        $EDITOR -R $(sed -n 1p ${LastResult})
     else
         echo Bad command format. dn v [N].
         exit 1
@@ -193,7 +195,7 @@ Created: $created
 
 EOF
     fi
-    vim $TempNote
+    $EDITOR $TempNote
     wc=$(awk FNR==1 $TempNote | wc -w)
     notetype=$(awk -F ': ' 'FNR==3 {print $2}' $TempNote)
     if [[ ${#notetype} -ne 1 ]]; then
