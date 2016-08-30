@@ -4,8 +4,7 @@ Repo="${BaseDir}/repo"
 LastResult="${BaseDir}/.last-result"
 LastSync="${BaseDir}/.last-sync"
 Trash="${BaseDir}/trash/"
-# EDITOR="vim"
-EDITOR="atom -f"
+EDITOR="vim"
 
 function printnotes() {
     note_no=1
