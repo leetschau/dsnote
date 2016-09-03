@@ -32,7 +32,7 @@ function listnotes() {
         echo Bad command format. dn l [N].
         exit 1
     fi
-    ls -t ${Repo}/*.mkd|head -${listno} > ${LastResult}
+    ls -t ${Repo}/*.md|head -${listno} > ${LastResult}
     printnotes
 }
 
@@ -42,7 +42,7 @@ function simplesearch() {
         exit 1
     fi
     # grep -i: ignore case; -l: only print file name
-    res=$(grep -i -l $1 $Repo/*.mkd)
+    res=$(grep -i -l $1 $Repo/*.md)
     if [[ -z $res ]]; then
         echo Nothing match.
         exit 0
@@ -67,7 +67,7 @@ function complexsearch() {
         echo Bad command format: no search keywords found.
         exit 1
     fi
-    res=$(ls -t $Repo/*.mkd)
+    res=$(ls -t $Repo/*.md)
     for key in $@; do
         if [[ $key = "-c" ]]; then
             line=0
@@ -201,7 +201,7 @@ EOF
         echo '"notetype" property must be specified with only ONE character, use "dn a" to edit notetype again'
         exit 1
     fi
-    fn=$notetype$(date +"%y%m%d%H%M%S").mkd
+    fn=$notetype$(date +"%y%m%d%H%M%S").md
     if [[ $wc -gt 1 && -n $notetype ]]; then
         mv $TempNote $Repo/$fn
     else
