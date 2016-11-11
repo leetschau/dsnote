@@ -18,9 +18,9 @@ REPO="$HOME/.donno/repo"
 OCTO_BLOG_HOME="$HOME/apps/octopress/source/_posts"
 
 if [[ $# -eq 0 ]]; then
-    newnotes=$(find $REPO -newer $(ls -t $OCTO_BLOG_HOME/*.markdown|head -1) -type f | egrep 't[0-9]+.mkd')
+    newnotes=$(find $REPO -newer $(ls -t $OCTO_BLOG_HOME/*.markdown|head -1) -type f | egrep 't[0-9]+.md')
 elif [[ $1 == "all" ]]; then
-    newnotes=$(ls $REPO/t*.mkd)
+    newnotes=$(ls $REPO/t*.md)
 else
     show_help
     exit 1
