@@ -113,6 +113,7 @@ function backupnotes() {
         git push
     fi
     cd -
+    touch $LastSync
 }
 
 function restorenotes() {
