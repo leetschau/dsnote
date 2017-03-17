@@ -5,6 +5,7 @@ LastResult="${BaseDir}/.last-result"
 LastSync="${BaseDir}/.last-sync"
 Trash="${BaseDir}/trash/"
 EDITOR="vim"
+NotesRepo="git@github:yourname/repo.git"
 
 function printnotes() {
     note_no=1
@@ -98,55 +99,32 @@ function complexsearch() {
         printnotes
     fi
 }
+
 function backupnotes() {
-    if [[ $# = 1 && $1 != 'c' ]]; then
+    if [[ $# == 1 && $1 != 'c' ]]; then
         echo "Unkown parameters. Synopsis: dn b [c]"
         exit 1
     fi
 
-    cd ~
-    fn=notes$(date +"%y-%m-%d-%H.%M.%S").bz2
-    touch $LastSync
-    tar jcf $fn $DonnoHome/
-    cd -
-    if [[ ! -f ./$fn ]]; then
-        mv ~/$fn .
-    fi
+    cd $Repo
+    git add -A
+    git commit -m 'update notes'
     if [[ $# == 1 && $1 == 'c' ]]; then
-        script_dir=$(dirname $0)
-        if [[ -x $script_dir/../Dropbox-Uploader/dropbox_uploader.sh ]]; then
-            $script_dir/../Dropbox-Uploader/dropbox_uploader.sh upload $fn backup/
-        else
-            echo "Please install Dropbox-Uploader for this function."
-            exit 1
-        fi
+        git push
     fi
+    cd -
 }
 
 function restorenotes() {
-    if [[ $# == 1 && $1 == 'c' ]]; then
-        script_dir=$(dirname $0)
-        if [[ -x $script_dir/../Dropbox-Uploader/dropbox_uploader.sh ]]; then
-            newest=$($script_dir/../Dropbox-Uploader/dropbox_uploader.sh list backup | awk 'END{print $3}')
-            $script_dir/../Dropbox-Uploader/dropbox_uploader.sh download backup/$newest
-        else
-            echo "Please install Dropbox-Uploader for this function."
-            exit 1
-        fi
-    fi
-    src=$(ls -t *.bz2|head -1)
-    if [ -z $src ]; then
-        echo There is no bz2 file under current folder.
-        exit 1
-    fi
-    read -p "Restore from $src? All local notes lost. (y/n) " -n 1
-    echo
-    if [[ $REPLY =~ ^y$ ]]; then
-        rm -rf ~/.donno
-        tar jxf $src -C ~/
+    if [ ! -d $Repo ]; then
+        mkdir -p $BaseDir
+        cd $BaseDir
+        git clone $NotesRepo repo
     else
-        echo User cancelled.
+        cd $Repo
+        git pull
     fi
+    cd -
     listnotes
 }
 
