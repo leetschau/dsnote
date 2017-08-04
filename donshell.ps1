@@ -3,6 +3,7 @@ $repo="$baseDir\repo"
 $editor = "vim"
 $viewer = "vim -R"
 $lastResult = "$baseDir\.last-result-win"
+$lastSync = "$baseDir\.last-sync-win"
 $noteFileExt = ".md"
 
 function printNotes {
@@ -119,6 +120,19 @@ function delNote {
   listNotes
 }
 
+function backupNotes {
+  Push-Location $repo
+  # need to deal with line ending problem
+  git add -A
+  git commit -m 'update notes'
+  Pop-Location
+  $timeStr = Get-Date
+  [System.IO.File]::WriteAllLines($lastSync, $timeStr)
+}
+
+function restoreNotes {
+}
+
 function runCommand {
   param([String[]] $items)
   $action = $items[0]
@@ -127,10 +141,12 @@ function runCommand {
   #write-host params: $params
   switch ($action) {
     a { addNote }
+    b { backupNotes }
     del { delNote $params }
     e { editNote $params }
     s { simpleSearch $params }
     l { listNotes $params }
+    r { restoreNotes }
     v { viewNote $params }
     default {"invalid params"}
   }
