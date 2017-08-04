@@ -1,6 +1,7 @@
 $baseDir = "c:\apps\cygRoot\home\lee_c\.donno"
 $repo="$baseDir\repo"
 $editor = "vim"
+$viewer = "vim -R"
 $lastResult = "$baseDir\.last-result-win"
 
 function printNotes {
@@ -14,13 +15,10 @@ function printNotes {
     $metaInfo = Get-Content -First 4 -Encoding UTF8 $fullname
     $x, $title = $metaInfo[0] -split ': '
     $x, $tags = $metaInfo[1] -split ': '
-    #write-host $tags
     $x, $type = ($metaInfo[2] -split ': ').ToUpper()
     $x, $createdStr = $metaInfo[3] -split ': '
     $y = [datetime]::ParseExact($createdStr, "yyyy-MM-dd HH:mm:ss", [Globalization.CultureInfo]::InvariantCulture)
     $created = $y.ToString("yy.M.d H:m")
-    #$aline = "$note_no. $title [$updated] $tags [$type] $created"
-    #write-host $aline.replace(' .', '.')
     write-host "$note_no. [ $type ] $title [$updated] $tags [$created]".replace(' .', '.')
   }
 }
@@ -59,6 +57,34 @@ function listNotes {
   printnotes 
 }
 
+function editNote {
+  param([String[]] $items)
+  $noteNo = 0
+  if  ($items.length -gt 0) {
+    $noteNo = [int]$items[0] - 1
+  }
+  $target = Get-Content $lastResult | Select -Index $noteNo
+  invoke-expression "$editor $target"
+  $x, $noteType = (Get-Content -First 4 -Encoding UTF8 $target)[2] -split ': '
+  $originName = split-path $target -leaf
+  $newName = $noteType + $originName.Substring(1)
+  $newFullName = Join-Path $repo $newName
+  if (-not (Test-Path $newFullName)) {
+    Rename-Item $target $newName
+  }
+  listNotes
+}
+
+function viewNote {
+  param([String[]] $items)
+  $noteNo = 0
+  if  ($items.length -gt 0) {
+    $noteNo = [int]$items[0] - 1
+  }
+  $target = Get-Content $lastResult | Select -Index $noteNo
+  invoke-expression "$viewer $target"
+}
+
 function runCommand {
   param([String[]] $items)
   $action = $items[0]
@@ -67,9 +93,11 @@ function runCommand {
   #write-host params: $params
   switch ($action) {
     a {"add note"}
+    del {"delete note"}
+    e { editNote $params }
     s { simpleSearch $params }
     l { listNotes $params }
-    del {"delete note"}
+    v { viewNote $params }
     default {"invalid params"}
   }
 }
