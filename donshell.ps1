@@ -3,6 +3,7 @@ $repo="$baseDir\repo"
 $editor = "vim"
 $viewer = "vim -R"
 $lastResult = "$baseDir\.last-result-win"
+$noteFileExt = ".md"
 
 function printNotes {
   $file_list = get-content $lastResult
@@ -51,7 +52,7 @@ function listNotes {
   if ($items.length -gt 0) {
     $listNo = $items[0]
   }
-  $noteList = Get-ChildItem $repo -Filter *.md | sort LastWriteTime -descending | select -first $listno | % {$_.FullName} 
+  $noteList = Get-ChildItem $repo -Filter ("*" + $noteFileExt) | sort LastWriteTime -descending | select -first $listno | % {$_.FullName} 
   [System.IO.File]::WriteAllLines($lastResult, $noteList)
   printnotes 
 }
@@ -85,7 +86,7 @@ function viewNote {
 }
 
 function addNote {
-  $tempNote = Join-Path $repo "temp.md"
+  $tempNote = Join-Path $repo ("temp" + $noteFileExt)
   $created = Get-Date -format "yyyy-MM-dd HH:mm:ss"
   $template = @"
 Title: 
@@ -98,6 +99,10 @@ Created: $created
 "@
   [System.IO.File]::WriteAllLines($tempNote, $template)
   invoke-expression "$editor $tempNote"
+  $x, $noteType = (Get-Content -First 4 -Encoding UTF8 $tempNote)[2] -split ': '
+  $creMark = Get-Date -format "yyMMddHHmmss"
+  $newName = $noteType + $creMark + $noteFileExt
+  Rename-Item $tempNote $newName
   listNotes
 }
 
