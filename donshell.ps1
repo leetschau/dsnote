@@ -39,10 +39,9 @@ function simpleSearch {
       write-host Nothing match.
       return
     }
-    #write-host $res
   }
-  #write-host $res
-  $res | out-file -encoding ASCII $lastResult
+  #$res | Out-File -encoding ASCII $lastResult  # when contains unicode characters, this encoding is UTF16
+  [System.IO.File]::WriteAllLines($lastResult, $res)
   printNotes
 }
 
@@ -53,7 +52,7 @@ function listNotes {
     $listNo = $items[0]
   }
   $noteList = Get-ChildItem $repo -Filter *.md | sort LastWriteTime -descending | select -first $listno | % {$_.FullName} 
-  $noteList | out-file -encoding ASCII $lastResult
+  [System.IO.File]::WriteAllLines($lastResult, $noteList)
   printnotes 
 }
 
@@ -85,6 +84,36 @@ function viewNote {
   invoke-expression "$viewer $target"
 }
 
+function addNote {
+  $tempNote = Join-Path $repo "temp.md"
+  $created = Get-Date -format "yyyy-MM-dd HH:mm:ss"
+  $template = @"
+Title: 
+Tags: 
+Notebook [t/j/o/y/c]: j
+Created: $created
+
+------
+
+"@
+  [System.IO.File]::WriteAllLines($tempNote, $template)
+  invoke-expression "$editor $tempNote"
+  listNotes
+}
+
+function delNote {
+  param([String[]] $items)
+  $noteNo = 0
+  if  ($items.length -gt 0) {
+    $noteNo = [int]$items[0] - 1
+  }
+  $target = Get-Content $lastResult | Select -Index $noteNo
+  $trashPath = Join-Path $baseDir "trash"
+  New-Item -ItemType Directory -Force -Path $trashPath | Out-Null
+  Move-Item $target $trashPath -force
+  listNotes
+}
+
 function runCommand {
   param([String[]] $items)
   $action = $items[0]
@@ -92,8 +121,8 @@ function runCommand {
   $params = $items | select-object -skip 1
   #write-host params: $params
   switch ($action) {
-    a {"add note"}
-    del {"delete note"}
+    a { addNote }
+    del { delNote $params }
     e { editNote $params }
     s { simpleSearch $params }
     l { listNotes $params }
