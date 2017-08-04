@@ -1,11 +1,13 @@
 $baseDir = "c:\apps\cygRoot\home\lee_c\.donno"
 $repo="$baseDir\repo"
+$editor = "vim"
 $lastResult = "$baseDir\.last-result-win"
 
 function printNotes {
   $file_list = get-content $lastResult
   #write-host $file_list
   $noteNo = 0
+  write-host No. Type Title Updated Tags Created Sync?
   foreach ($fullname in $file_list) {
     $note_no++
     $updated = Get-Date (Get-Item $fullname).LastWriteTime -format "yy.M.d H:m"
@@ -17,7 +19,9 @@ function printNotes {
     $x, $createdStr = $metaInfo[3] -split ': '
     $y = [datetime]::ParseExact($createdStr, "yyyy-MM-dd HH:mm:ss", [Globalization.CultureInfo]::InvariantCulture)
     $created = $y.ToString("yy.M.d H:m")
-    write-host $note_no [$updated] $title [$tags] [$type] $created
+    #$aline = "$note_no. $title [$updated] $tags [$type] $created"
+    #write-host $aline.replace(' .', '.')
+    write-host "$note_no. [ $type ] $title [$updated] $tags [$created]".replace(' .', '.')
   }
 }
 
@@ -44,6 +48,17 @@ function simpleSearch {
   printNotes
 }
 
+function listNotes {
+  param([String[]] $items)
+  $listNo = 5
+  if ($items.length -gt 0) {
+    $listNo = $items[0]
+  }
+  $noteList = Get-ChildItem $repo -Filter *.md | sort LastWriteTime -descending | select -first $listno | % {$_.FullName} 
+  $noteList | out-file -encoding ASCII $lastResult
+  printnotes 
+}
+
 function runCommand {
   param([String[]] $items)
   $action = $items[0]
@@ -53,7 +68,7 @@ function runCommand {
   switch ($action) {
     a {"add note"}
     s { simpleSearch $params }
-    l {"list notes"}
+    l { listNotes $params }
     del {"delete note"}
     default {"invalid params"}
   }
