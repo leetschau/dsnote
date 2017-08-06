@@ -21,14 +21,14 @@ function printNotes {
     $x, $createdStr = $metaInfo[3] -split ': '
     $y = [datetime]::ParseExact($createdStr, "yyyy-MM-dd HH:mm:ss", [Globalization.CultureInfo]::InvariantCulture)
     $created = $y.ToString("yy.M.d H:m")
-    write-host "$note_no. [ $type ] $title [$updated] $tags [$created]".replace(' .', '.')
+    $toSync = If ((Get-Item $fullname).LastWriteTime -gt (Get-Item $lastSync).LastWriteTime) {"*"} Else {""}
+    write-host "$note_no. [ $type ] $title [$updated] $tags [$created] $toSync".replace(' .', '.')
   }
 }
 
 function simpleSearch {
   param([String[]] $items)
   #write-host $items
-  #write-host $items.length
   if ($items.length -eq 0) {
     "add search items"
     return
@@ -42,8 +42,8 @@ function simpleSearch {
       return
     }
   }
-  #$res | Out-File -encoding ASCII $lastResult  # when contains unicode characters, this encoding is UTF16
-  [System.IO.File]::WriteAllLines($lastResult, $res)
+  $res | Out-File -encoding UTF8 $lastResult
+  #[System.IO.File]::WriteAllLines($lastResult, $res)
   printNotes
 }
 
@@ -54,7 +54,8 @@ function listNotes {
     $listNo = $items[0]
   }
   $noteList = Get-ChildItem $repo -Filter ("*" + $noteFileExt) | sort LastWriteTime -descending | select -first $listno | % {$_.FullName} 
-  [System.IO.File]::WriteAllLines($lastResult, $noteList)
+  #[System.IO.File]::WriteAllLines($lastResult, $noteList)
+  $noteList | Out-File -encoding UTF8 $lastResult
   printnotes 
 }
 
@@ -96,7 +97,6 @@ Notebook [t/j/o/y/c]: j
 Created: $created
 
 ------
-
 "@
   [System.IO.File]::WriteAllLines($tempNote, $template)
   invoke-expression "$editor $tempNote"
@@ -121,16 +121,34 @@ function delNote {
 }
 
 function backupNotes {
+  param([String[]] $items)
   Push-Location $repo
-  # need to deal with line ending problem
+  if  ($items[0] -eq 'c') {
+    git push
+    Pop-Location
+    return
+  }
   git add -A
   git commit -m 'update notes'
   Pop-Location
-  $timeStr = Get-Date
-  [System.IO.File]::WriteAllLines($lastSync, $timeStr)
+  $timeStr = (Get-Date).ToString()
+  $timeStr | Out-File -encoding UTF8 $lastSync
 }
 
 function restoreNotes {
+  if (-not (Test-Path $repo)) {
+    New-Item -Path $baseDir
+    Push-Location $baseDir
+    $noteRepo = Read-Host -Prompt 'Input note repo address (git@...)'
+    git clone $noteRepo repo
+  } else {
+    Push-Location $repo
+    git pull
+  }
+  Pop-Location
+  $timeStr = (Get-Date).ToString()
+  $timeStr | Out-File -encoding UTF8 $lastSync
+  listNotes
 }
 
 function runCommand {
@@ -141,12 +159,12 @@ function runCommand {
   #write-host params: $params
   switch ($action) {
     a { addNote }
-    b { backupNotes }
+    b { backupNotes $params }
     del { delNote $params }
     e { editNote $params }
-    s { simpleSearch $params }
     l { listNotes $params }
     r { restoreNotes }
+    s { simpleSearch $params }
     v { viewNote $params }
     default {"invalid params"}
   }
