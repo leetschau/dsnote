@@ -4,17 +4,15 @@ For all terminal fans :)
 
 # Installation
 
-```
-$ cd $APP_BASE
-$ git clone https://leechau@bitbucket.org/leechau/dsnote.git
-```
+First clone this repo into your $APP_BASE folder.
 
 For Linux, check if the file 'donshell.sh' has executable permission.
 If not, run `chmod 755 $APP_BASE/dsnote/donshell.sh`.
 Then open ~/.bashrc or ~/.zshrc, add a alias:
 `alias dn=$APP_BASE/dsnote/donshell.sh'`.
 
-For Windows, install vim and [pt](https://github.com/monochromegane/the_platinum_searcher) with:
+For Windows, install editor and viewer *vim* and file searcher
+[pt](https://github.com/monochromegane/the_platinum_searcher) with:
 ```
 choco install vim
 choco install pt
@@ -23,7 +21,7 @@ choco install pt
 Then define a command alias for your console emulator.
 For example, with [cmder](http://cmder.net/),
 add `dn=powershell -f C:\path\to\your\dsnote\donshell.ps1 $*` into file
-%CMDER_ROOT%\config\user-aliases.cmd.
+*%CMDER_ROOT%\config\user-aliases.cmd*.
 
 # Usage
 

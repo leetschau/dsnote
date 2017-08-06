@@ -5,7 +5,6 @@ LastResult="${BaseDir}/.last-result"
 LastSync="${BaseDir}/.last-sync"
 Trash="${BaseDir}/trash/"
 EDITOR="vim"
-NotesRepo="git@github:yourname/repo.git"
 
 function printnotes() {
     note_no=1
@@ -120,12 +119,14 @@ function restorenotes() {
     if [ ! -d $Repo ]; then
         mkdir -p $BaseDir
         cd $BaseDir
-        git clone $NotesRepo repo
+        read -p 'Input note repo address (git@...): ' noteRepo
+        git clone $notesRepo repo
     else
         cd $Repo
         git pull
     fi
     cd -
+    touch $LastSync
     listnotes
 }
 
