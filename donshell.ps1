@@ -123,13 +123,12 @@ function delNote {
 function backupNotes {
   param([String[]] $items)
   Push-Location $repo
-  if  ($items[0] -eq 'c') {
+  if (($items.length -gt 0) -and ($items[0] -eq 'c')) {
     git push
-    Pop-Location
-    return
+  } else {
+    git add -A
+    git commit -m 'update notes'
   }
-  git add -A
-  git commit -m 'update notes'
   Pop-Location
   $timeStr = (Get-Date).ToString()
   $timeStr | Out-File -encoding UTF8 $lastSync
