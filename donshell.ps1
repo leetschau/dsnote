@@ -1,5 +1,5 @@
 $baseDir = "c:\apps\cygRoot\home\lee_c\.donno"
-$repo="$baseDir\repo"
+$repo = "$baseDir\repo"
 $editor = "vim"
 $viewer = "vim -R"
 $lastResult = "$baseDir\.last-result-win"
@@ -35,15 +35,16 @@ function simpleSearch {
     "add search items"
     return
   }
-  $res = $repo
+
+  $res = "$repo\*$noteFileExt"
   foreach ($kw in $items) {
-    #write-host $kw
-    $res = @(pt /i /l $kw $res)
-    if ($res.length -eq 0) {
+    $res = Select-String -Path $res -Pattern $kw | % { $_.Path } | Get-Unique
+    if ($res.Length -eq 0) {
       Write-Host Nothing match.
       return
     }
   }
+
   $res | % { Get-Item $_ } | Sort-Object LastWriteTime -Descending |
     % { $_.FullName } | Out-File -encoding UTF8 $lastResult
   printNotes
@@ -55,7 +56,7 @@ function listNotes {
   if ($items.length -gt 0) {
     $listNo = $items[0]
   }
-  $noteList = Get-ChildItem $repo -Filter ("*" + $noteFileExt) |
+  $noteList = Get-ChildItem $repo -Filter "*$noteFileExt" |
     sort LastWriteTime -descending | select -first $listno | % {$_.FullName} 
   #[System.IO.File]::WriteAllLines($lastResult, $noteList)
   $noteList | Out-File -encoding UTF8 $lastResult
@@ -91,7 +92,7 @@ function viewNote {
 }
 
 function addNote {
-  $tempNote = Join-Path $repo ("temp" + $noteFileExt)
+  $tempNote = Join-Path $repo "temp$noteFileExt"
   $created = Get-Date -format "yyyy-MM-dd HH:mm:ss"
   $template = @"
 Title: 
