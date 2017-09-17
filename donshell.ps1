@@ -10,7 +10,7 @@ function printNotes {
   $file_list = get-content $lastResult
   #write-host $file_list
   $noteNo = 0
-  write-host No. Type Title Updated Tags Created Sync?
+  Write-Host No. Type Title Updated Tags Created Sync?
   foreach ($fullname in $file_list) {
     $note_no++
     $updated = Get-Date (Get-Item $fullname).LastWriteTime -format "yy.M.d H:m"
@@ -19,10 +19,12 @@ function printNotes {
     $x, $tags = $metaInfo[1] -split ': '
     $x, $type = ($metaInfo[2] -split ': ').ToUpper()
     $x, $createdStr = $metaInfo[3] -split ': '
-    $y = [datetime]::ParseExact($createdStr, "yyyy-MM-dd HH:mm:ss", [Globalization.CultureInfo]::InvariantCulture)
+    $y = [datetime]::ParseExact($createdStr, "yyyy-MM-dd HH:mm:ss",
+         [Globalization.CultureInfo]::InvariantCulture)
     $created = $y.ToString("yy.M.d H:m")
-    $toSync = If ((Get-Item $fullname).LastWriteTime -gt (Get-Item $lastSync).LastWriteTime) {"*"} Else {""}
-    write-host "$note_no. [ $type ] $title [$updated] $tags [$created] $toSync".replace(' .', '.')
+    $toSync = If ((Get-Item $fullname).LastWriteTime -gt
+              (Get-Item $lastSync).LastWriteTime) {"*"} Else {""}
+    Write-Host "$note_no. [ $type ] $title [$updated] $tags [$created] $toSync".replace(' .', '.')
   }
 }
 
@@ -38,12 +40,12 @@ function simpleSearch {
     #write-host $kw
     $res = @(pt /i /l $kw $res)
     if ($res.length -eq 0) {
-      write-host Nothing match.
+      Write-Host Nothing match.
       return
     }
   }
-  $res | Out-File -encoding UTF8 $lastResult
-  #[System.IO.File]::WriteAllLines($lastResult, $res)
+  $res | % { Get-Item $_ } | Sort-Object LastWriteTime -Descending |
+    % { $_.FullName } | Out-File -encoding UTF8 $lastResult
   printNotes
 }
 
@@ -53,7 +55,8 @@ function listNotes {
   if ($items.length -gt 0) {
     $listNo = $items[0]
   }
-  $noteList = Get-ChildItem $repo -Filter ("*" + $noteFileExt) | sort LastWriteTime -descending | select -first $listno | % {$_.FullName} 
+  $noteList = Get-ChildItem $repo -Filter ("*" + $noteFileExt) |
+    sort LastWriteTime -descending | select -first $listno | % {$_.FullName} 
   #[System.IO.File]::WriteAllLines($lastResult, $noteList)
   $noteList | Out-File -encoding UTF8 $lastResult
   printnotes 
@@ -170,6 +173,6 @@ function runCommand {
 }
 
 switch ($args.length) {
-  0 {write-host help doc}
+  0 {Write-Host help doc}
   default {runCommand $args}
 }
