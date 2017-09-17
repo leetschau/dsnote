@@ -129,8 +129,10 @@ Notebook [t/j/o/y/c]: j
 Created: $created
 
 ------
+
+
 "@
-  [System.IO.File]::WriteAllLines($tempNote, $template)
+  $template | Out-File -encoding UTF8 $tempNote
   invoke-expression "$editor $tempNote"
   $x, $noteType = (Get-Content -First 4 -Encoding UTF8 $tempNote)[2] -split ': '
   $creMark = Get-Date -format "yyMMddHHmmss"
