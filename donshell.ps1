@@ -50,6 +50,34 @@ function simpleSearch {
   printNotes
 }
 
+function complexSearch {
+  param([String[]] $items)
+  if ($items.length -le 1) {
+    "add search items"
+    return
+  }
+
+  $lineno = 1  # searching title by default
+  if ($items[0] -eq '-g') {
+    $lineno = 2
+  }
+
+  $res = "$repo\*$noteFileExt"
+  foreach ($kw in ($items | Select-Object -Skip 1)) {
+    $res = Select-String -Path $res -Pattern $kw |
+           Where-Object { $_.LineNumber -eq $lineno } |
+           % { $_.Path } | Get-Unique
+    if ($res.Length -eq 0) {
+      Write-Host Nothing match.
+      return
+    }
+  }
+
+  $res | % { Get-Item $_ } | Sort-Object LastWriteTime -Descending |
+    % { $_.FullName } | Out-File -encoding UTF8 $lastResult
+  printNotes
+}
+
 function listNotes {
   param([String[]] $items)
   $listNo = 5
@@ -168,6 +196,7 @@ function runCommand {
     l { listNotes $params }
     r { restoreNotes }
     s { simpleSearch $params }
+    sc { complexSearch $params }
     v { viewNote $params }
     default {"invalid params"}
   }
