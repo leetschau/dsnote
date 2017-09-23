@@ -119,7 +119,7 @@ function restorenotes() {
     if [ ! -d $Repo ]; then
         mkdir -p $BaseDir
         cd $BaseDir
-        read -p 'Input note repo address (git@...): ' noteRepo
+        read -p 'Input note repo address (git@...): ' notesRepo
         git clone $notesRepo repo
     else
         cd $Repo
