@@ -5,20 +5,25 @@ $viewer = "vim -R"
 $lastResult = "$baseDir\.last-result-win"
 $lastSync = "$baseDir\.last-sync-win"
 $noteFileExt = ".md"
+$titleLineIndex = 0
+$tagLineIndex = 1
+$noteTypeLineIndex = 2
+$createdLineIndex = 3
+$modifiedLineIndex = 4   # the line index of "Modified: 2017-09-27 13:11:23"
 
 function printNotes {
-  $file_list = get-content $lastResult
+  $file_list = Get-Content $lastResult
   #write-host $file_list
   $noteNo = 0
   Write-Host No. Type Title Updated Tags Created Sync?
   foreach ($fullname in $file_list) {
     $note_no++
     $updated = Get-Date (Get-Item $fullname).LastWriteTime -format "yy.M.d H:m"
-    $metaInfo = Get-Content -First 4 -Encoding UTF8 $fullname
-    $x, $title = $metaInfo[0] -split ': '
-    $x, $tags = $metaInfo[1] -split ': '
-    $x, $type = ($metaInfo[2] -split ': ').ToUpper()
-    $x, $createdStr = $metaInfo[3] -split ': '
+    $metaInfo = Get-Content -Encoding UTF8 $fullname
+    $x, $title = $metaInfo[$titleLineIndex] -split ': '
+    $x, $tags = $metaInfo[$tagLineIndex] -split ': '
+    $x, $type = ($metaInfo[$noteTypeLineIndex] -split ': ').ToUpper()
+    $x, $createdStr = $metaInfo[$createdLineIndex] -split ': '
     $y = [datetime]::ParseExact($createdStr, "yyyy-MM-dd HH:mm:ss",
          [Globalization.CultureInfo]::InvariantCulture)
     $created = $y.ToString("yy.M.d H:m")
@@ -99,7 +104,14 @@ function editNote {
   }
   $target = Get-Content $lastResult | Select -Index $noteNo
   invoke-expression "$editor $target"
-  $x, $noteType = (Get-Content -First 4 -Encoding UTF8 $target)[2] -split ': '
+
+  $updated = Get-Date (Get-Item $target).LastWriteTime -format "yy.M.d H:m:s"
+  $content = Get-Content $target
+  $content[$modifiedLineIndex] = "Modified: $updated"
+  $content | Out-File -encoding UTF8 $target
+
+  $x, $noteType = (Get-Content -First $modifiedLineIndex `
+                       -Encoding UTF8 $target)[$noteTypeLineIndex] -split ': '
   $originName = split-path $target -leaf
   $newName = $noteType + $originName.Substring(1)
   $newFullName = Join-Path $repo $newName
@@ -127,6 +139,7 @@ Title:
 Tags: 
 Notebook [t/j/o/y/c]: j
 Created: $created
+Modified: $created
 
 ------
 
@@ -134,7 +147,8 @@ Created: $created
 "@
   $template | Out-File -encoding UTF8 $tempNote
   invoke-expression "$editor $tempNote"
-  $x, $noteType = (Get-Content -First 4 -Encoding UTF8 $tempNote)[2] -split ': '
+  $x, $noteType = (Get-Content -First $modifiedLineIndex `
+                       -Encoding UTF8 $tempNote)[$noteTypeLineIndex] -split ': '
   $creMark = Get-Date -format "yyMMddHHmmss"
   $newName = $noteType + $creMark + $noteFileExt
   Rename-Item $tempNote $newName
@@ -178,6 +192,13 @@ function restoreNotes {
     Push-Location $repo
     git pull
   }
+  
+  foreach ($afile in (Get-ChildItem $repo\*$noteFileExt)) {
+    $x, $modified = (Get-Content -Encoding UTF8 $afile)[$modifiedLineIndex] `
+                    -split ": "
+    $afile.LastWriteTime = Get-Date $modified
+  }
+
   Pop-Location
   $timeStr = (Get-Date).ToString()
   $timeStr | Out-File -encoding UTF8 $lastSync
