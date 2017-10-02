@@ -5,6 +5,7 @@ LastResult="${BaseDir}/.last-result"
 LastSync="${BaseDir}/.last-sync"
 Trash="${BaseDir}/trash/"
 EDITOR="vim"
+MODIFIED_LINE_NO=5  # the line number of "Modified: 2017-09-27 11:14:55"
 
 function printnotes() {
     note_no=1
@@ -125,6 +126,10 @@ function restorenotes() {
         cd $Repo
         git pull
     fi
+    for afile in $Repo/*; do
+      modified=$(awk -F ': ' 'FNR==5 {print $2}' $afile)  # 5 is MODIFIED_LINE_NO
+      touch -d $modified $afile
+    done
     cd -
     touch $LastSync
     listnotes
@@ -140,6 +145,10 @@ function editnote() {
         exit 1
     fi
     $EDITOR $target
+
+    updated=$(date -r $target +"%Y-%m-%d %H:%M:%S")
+    sed -i "$MODIFIED_LINE_NO c Modified: $updated" $target
+
     notetype=$(awk -F ': ' 'FNR==3 {print $2}' $target)
     originName=$(basename $target)
     newname=$Repo/$notetype${originName:1}
@@ -169,6 +178,7 @@ Title:
 Tags: 
 Notebook [t/j/o/y/c]: 
 Created: $created
+Modified: $created
 
 ------
 
