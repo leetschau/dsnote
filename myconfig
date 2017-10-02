@@ -1,0 +1,3 @@
+PubBlogPath="$HOME/.donno/repo/t*.md"
+BlogURL="git@github.com:leetschau/tblog.git"
+#BlogURL="git@code.aliyun.com:leechau/tblog.git"

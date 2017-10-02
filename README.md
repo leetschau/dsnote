@@ -11,11 +11,9 @@ If not, run `chmod 755 $APP_BASE/dsnote/donshell.sh`.
 Then open ~/.bashrc or ~/.zshrc, add a alias:
 `alias dn=$APP_BASE/dsnote/donshell.sh'`.
 
-For Windows, install editor and viewer *vim* and file searcher
-[pt](https://github.com/monochromegane/the_platinum_searcher) with:
+For Windows, install editor and viewer *vim* with:
 ```
 choco install vim
-choco install pt
 ```
 
 Then define a command alias for your console emulator.
@@ -46,6 +44,10 @@ add `dn=powershell -f C:\path\to\your\dsnote\donshell.ps1 $*` into file
 * Backup notes to remote repo: `dn b c`;
 
 * Restore notes from remote repo: `dn r`
+
+# Publish tech blogs
+
+Modify the values in file *myconfig* and run `./pub-to-github.sh`.
 
 # Some notes
 
