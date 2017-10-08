@@ -106,7 +106,7 @@ function editNote {
   invoke-expression "$editor $target"
 
   $updated = Get-Date (Get-Item $target).LastWriteTime -format "yy.M.d H:m:s"
-  $content = Get-Content $target
+  $content = Get-Content -Encoding UTF8 $target
   $content[$modifiedLineIndex] = "Modified: $updated"
   $content | Out-File -encoding UTF8 $target
 
