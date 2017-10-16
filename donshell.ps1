@@ -105,7 +105,7 @@ function editNote {
   $target = Get-Content $lastResult | Select -Index $noteNo
   invoke-expression "$editor $target"
 
-  $updated = Get-Date (Get-Item $target).LastWriteTime -format "yy.M.d H:m:s"
+  $updated = Get-Date (Get-Item $target).LastWriteTime -format  "yyyy-MM-dd HH:mm:ss"
   $content = Get-Content -Encoding UTF8 $target
   $content[$modifiedLineIndex] = "Modified: $updated"
   $content | Out-File -encoding UTF8 $target
