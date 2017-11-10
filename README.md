@@ -11,7 +11,31 @@ If not, run `chmod 755 $APP_BASE/dsnote/donshell.sh`.
 Then open ~/.bashrc or ~/.zshrc, add a alias:
 `alias dn=$APP_BASE/dsnote/donshell.sh'`.
 
-For Windows, install editor and viewer *vim* with:
+For Windows, you have 2 options:
+
+## Based on bash
+
+1. Install Git client from [Git website](https://git-scm.com/),
+   so you got *git bash*, which is based on *mintty*;
+
+1. Setup vim toolchain. In git bash:
+
+    1. copy your *.vimrc* file to *~/.vimrc*;
+
+    1. download file [plug.vim](https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim)
+       to *~/.vim/autoload* according to [vim-plug](https://github.com/junegunn/vim-plug);
+
+    1. in vim, run `:PlugInstall`
+
+1. Clone [dsnote](https://github.com/leetschau/dsnote) into your app directory,
+   for example: */d/apps*;
+
+1. Setup command alias `dn`:  create file *~/.bashrc* or *~/.bash_profile* with
+   content `alias dn='/d/apps/dsnote/donshell.sh'`;
+
+## Based on Windows console
+
+Install editor and viewer *vim* with:
 ```
 choco install vim
 ```
