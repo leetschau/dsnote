@@ -24,6 +24,10 @@ function printnotes() {
 }
 
 function listnotes() {
+    if [ ! -d $Repo ]; then
+        echo "There is no notes, restore with 'dn r' and try again"
+        exit 1
+    fi
     echo No. Updated, Title, Tags, Notebook, Created, Sync?
     if test $# -eq 1; then
         listno=$1
@@ -126,9 +130,11 @@ function restorenotes() {
         cd $Repo
         git pull
     fi
+    echo "notes repo pull over"
     for afile in $Repo/*; do
       modified=$(awk -F ': ' 'FNR==5 {print $2}' $afile)  # 5 is MODIFIED_LINE_NO
-      touch -d $modified $afile
+      echo modify LastModTime of file $afile to $modified
+      touch -d "$modified" $afile
     done
     cd -
     touch $LastSync
