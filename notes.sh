@@ -1,10 +1,12 @@
-DonnoHome=".donno"
+export XDG_CONFIG_HOME="$HOME/.config/vimrcs/text"
+
+DonnoHome=".dsnote"
 BaseDir="${HOME}/$DonnoHome"
 Repo="${BaseDir}/repo"
 LastResult="${BaseDir}/.last-result"
 LastSync="${BaseDir}/.last-sync"
 Trash="${BaseDir}/trash/"
-EDITOR="vim"
+EDITOR="nvim"
 MODIFIED_LINE_NO=5  # the line number of "Modified: 2017-09-27 11:14:55"
 
 function printnotes() {
