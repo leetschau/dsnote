@@ -11,7 +11,11 @@ backup:
 let main argv =
   match argv |> Array.toList with
   | "s" :: args ->
-    printfn "res: %A" (Notes.simpleSearch args)
+    printfn "%s" (Notes.simpleSearch args)
+  | ["a"] ->
+    Notes.addNote ()
+  | ["l"; num] ->
+    printfn "%s" (num |> int |> Notes.listNotes)
   | [] ->
     printf "%s" usage
   | _ ->
