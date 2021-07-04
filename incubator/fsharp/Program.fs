@@ -1,4 +1,5 @@
 open System
+open System.Reflection
 
 let usage = """Usage:
 search:
@@ -10,14 +11,24 @@ backup:
 [<EntryPoint>]
 let main argv =
   match argv |> Array.toList with
-  | "s" :: args ->
-    printfn "%s" (Notes.simpleSearch args)
-  | ["a"] ->
-    Notes.addNote ()
-  | ["l"; num] ->
+  | ["a"] | ["add"] ->
+    printfn "%s" (Notes.addNote ())
+  | ["e"] | ["edit"] ->
+    printfn "%s" (Notes.editNote 1)
+  | ["e"; no] | ["edit"; no] ->
+    printfn "%s" (no |> int |> Notes.editNote)
+  | ["l"] | ["list"] ->
+    printfn "%s" (Notes.listNotes Notes.DEFAULT_REC_NO)
+  | ["l"; num] | ["list"; num] ->
     printfn "%s" (num |> int |> Notes.listNotes)
-  | [] ->
+  | "s" :: args | "search" :: args ->
+    printfn "%s" (Notes.simpleSearch args)
+  | ["v"] | ["view"] ->
+    printfn "%s" (Notes.viewNote 1)
+  | ["v"; no] | ["view"; no] ->
+    printfn "%s" (no |> int |> Notes.viewNote)
+  | ["version"] ->
+    printfn "donno version: %s" <| Assembly.GetEntryAssembly().GetName().Version.ToString()
+  | [] | _ ->
     printf "%s" usage
-  | _ ->
-    printfn "%s" usage
   0
