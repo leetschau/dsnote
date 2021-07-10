@@ -20,22 +20,6 @@ type Note = {
     Content: string
     FilePath: string }
 
-type SearchItem =
-    | Title of string
-    | TagList of string list
-    | Notebook of string
-    | Created of DateTime
-    | Updated of DateTime
-    | Content of string
-
-type SearchFlag =
-    | TextFlag of ignoreCase : bool * wholeWord : bool
-    | DateFlag of beforeDate : bool
-
-type SearchTerm =
-    { Body: SearchItem
-      Flag: SearchFlag option }
-
 let parseNote (note: string): Note =
     let lines = File.ReadAllLines note
     { Title = lines.[0].[7..]
@@ -65,6 +49,22 @@ let simpleSearch (args: string list): string =
                           (loadNotes NOTE_REPO)
                           args
     saveAndDisplayNotes notes
+
+type SearchItem =
+    | Title of string
+    | TagList of string list
+    | Notebook of string
+    | Created of DateTime
+    | Updated of DateTime
+    | Content of string
+
+type SearchFlag =
+    | TextFlag of ignoreCase : bool * wholeWord : bool
+    | DateFlag of beforeDate : bool
+
+type SearchTerm =
+    { Body: SearchItem
+      Flag: SearchFlag option }
 
 let advancedSearch (args: string list): string =
     let parseTerm (term: string): SearchTerm option =
@@ -128,7 +128,25 @@ let advancedSearch (args: string list): string =
         | _ -> None
 
     let noteOnTerm (term: SearchTerm option) (note: Note): bool =
-        true
+        match term with
+        | Some({ Body = Title(word); Flag = Some(TextFlag(icase, wword)) }) ->
+            let target = if icase then note.Title.ToLower() else note.Title
+            let token = if icase then word.ToLower() else word
+            if wword then target.Split " " |> Array.toList |> List.exists (fun x -> x = token)
+            else target.Contains token
+        | Some({ Body = TagList(tags); Flag = Some(TextFlag(icase, wword)) }) ->
+            let target = List.map (fun x -> if icase then x.ToLower() else x) note.TagList
+            let token = if icase then word.ToLower() else word
+            if wword then target.Split " " |> Array.toList |> List.exists (fun x -> x = token)
+            else target.Contains token
+
+        | Some({ Body = Notebook(notebook); Flag = Some(TextFlag(icase, wword)) }) ->
+            true
+        | Some({ Body = Created(created); Flag = Some(DateFlag(beforeDate = bd)) }) ->
+            true
+        | Some({ Body = Updated(updated); Flag = Some(DateFlag(beforeDate = bd)) }) ->
+            true
+        | _ -> false
 
     let notes = List.fold (fun noteList term -> noteList |> List.filter (noteOnTerm term))
                           (loadNotes NOTE_REPO)

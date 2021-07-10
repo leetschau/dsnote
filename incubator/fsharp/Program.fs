@@ -21,6 +21,8 @@ let main argv =
     printfn "%s" (Notes.listNotes Notes.DEFAULT_REC_NO)
   | ["l"; num] | ["list"; num] ->
     printfn "%s" (num |> int |> Notes.listNotes)
+  | "s" :: "-a" :: args | "search" :: "--advanced" :: args ->
+    printfn "%s" (Notes.advancedSearch args)
   | "s" :: args | "search" :: args ->
     printfn "%s" (Notes.simpleSearch args)
   | ["v"] | ["view"] ->
