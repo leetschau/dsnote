@@ -16,4 +16,7 @@ while focuses on the following features:
   It can run on Windows in WSL. However it's not *native* to Windows.
   With .NET SDK and F#, it's convenient to build native applications for both Linux and Windows.
 
+## Todo list
 
+* Configuration module
+* Sync via git
