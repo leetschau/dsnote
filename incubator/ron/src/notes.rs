@@ -1,4 +1,6 @@
 use chrono::{DateTime, Utc};
+use std::path::Path;
+use std::fs;
 
 #[derive(Debug)]
 pub struct Note {
@@ -11,6 +13,14 @@ pub struct Note {
     file_path: String,
 }
 
+impl Note {
+    fn parse(&path: &Path) -> Note {
+
+    }
+
+    fn save(&self, &path: &Path) {
+    }
+}
 pub fn edit_note(note_no: u32) {
     println!("Edit note No. {}", note_no);
 }
